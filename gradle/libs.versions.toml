@@ -1,0 +1,57 @@
+[versions]
+springBoot = "3.5.11"
+mapstruct = "1.5.5.Final"
+reactor = "3.4.0"
+reactor-netty = "1.2.13"
+lombok = "1.18.32"
+resilience4j = "2.2.0"
+resilience4j-sb3 = "2.3.0"
+springdoc = "2.7.0"
+wiremock = "3.13.1"
+
+[libraries]
+
+# [SPRING BOOT]
+spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+boot-starter-jdbc = { module = "org.springframework.boot:spring-boot-starter-jdbc" }
+boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+h2 = { module = "com.h2database:h2" }
+boot-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+
+# [REACTOR]
+reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "reactor" }
+reactor-netty-core = { module = "io.projectreactor.netty:reactor-netty-core", version.ref = "reactor-netty" }
+
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+
+# [JACKSON]
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
+
+# [MAPSTRUCT]
+mapstruct = { module = "org.mapstruct:mapstruct" , version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor" , version.ref = "mapstruct" }
+
+# [RESILIENCE4J]
+resilience4j-cb = { module = "io.github.resilience4j:resilience4j-circuitbreaker", version.ref = "resilience4j" }
+resilience4j-reactor = { module = "io.github.resilience4j:resilience4j-reactor", version.ref = "resilience4j" }
+resilience4j-spring-boot3 = { module = "io.github.resilience4j:resilience4j-spring-boot3", version.ref = "resilience4j-sb3" }
+
+# [ACTUATOR]
+actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+
+# [MICROMETER]
+micrometer-bridge-otel = { module = "io.micrometer:micrometer-tracing-bridge-otel" }
+micrometer-core = { module = "io.micrometer:micrometer-core" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
+micrometer-tracing = { module = "io.micrometer:micrometer-tracing" }
+
+# [SPRINGDOC & TESTS]
+boot-springdoc-webflux = { module = "org.springdoc:springdoc-openapi-starter-webflux-ui", version.ref = "springdoc" }
+boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+reactor-test = { module = "io.projectreactor:reactor-test" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+wiremock = { module = "org.wiremock:wiremock-standalone", version.ref = "wiremock" }
+boot-validation-test = { module = "org.springframework.boot:spring-boot-starter-validation" }
