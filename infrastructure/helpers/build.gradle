@@ -1,0 +1,10 @@
+dependencies {
+    implementation project(':model')
+    implementation libs.boot.starter.webflux
+    implementation libs.jackson.databind
+
+    compileOnly         libs.lombok
+    annotationProcessor libs.lombok
+    implementation libs.boot.starter.security
+    implementation libs.micrometer.bridge.otel
+}

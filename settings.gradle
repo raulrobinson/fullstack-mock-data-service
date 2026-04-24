@@ -1,1 +1,21 @@
 rootProject.name = 'fullstack-mock-data-service'
+
+// Application Layers
+include "app-service"
+project(':app-service').projectDir = file('applications/app-service')
+
+// Domain Layers
+include "model"
+project(':model').projectDir = file('domain/model')
+include "ports"
+project(':ports').projectDir = file('domain/ports')
+include "use-case"
+project(':use-case').projectDir = file('domain/use-case')
+
+// Infrastructure Layers
+include "reactive-web"
+project(':reactive-web').projectDir = file('infrastructure/entry-points/reactive-web')
+include "inmemmory-persistence"
+project(':inmemmory-persistence').projectDir = file('infrastructure/driven-adapters/inmemmory-persistence')
+include "helpers"
+project(':helpers').projectDir = file('infrastructure/helpers')

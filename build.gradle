@@ -1,44 +1,50 @@
 plugins {
-	id "java"
-	id "org.springframework.boot" version "${springBootVersion}"
-	id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
+	id "org.springframework.boot" version "${springBootVersion}" apply false
+	id "io.spring.dependency-management" version "${springDependencyManagementVersion}" apply false
 }
 
-group = "com.raulbolivar"
-version = "0.0.1-SNAPSHOT"
+allprojects {
+	group = "com.raulbolivar"
+	version = "0.0.1-SNAPSHOT"
+	description = "API REST reactive con Spring WebFlux"
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+	repositories {
+		mavenCentral()
 	}
 }
 
-repositories {
-	mavenCentral()
+subprojects {
+
+	apply plugin: "java"
+
+	java {
+		toolchain {
+			languageVersion = JavaLanguageVersion.of(21)
+		}
+	}
+
+	configurations {
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+	}
+
+	dependencies {
+		implementation     platform(libs.spring.boot.bom)
+		testImplementation platform(libs.spring.boot.bom)
+
+		implementation libs.boot.starter.validation
+
+		testImplementation libs.boot.starter.test
+		testImplementation libs.boot.validation.test
+		testImplementation libs.boot.starter.test
+		testCompileOnly libs.lombok
+		testRuntimeOnly libs.junit.platform.launcher
+		testAnnotationProcessor libs.lombok
+	}
+
+	tasks.named("test") {
+		useJUnitPlatform()
+	}
 }
 
-dependencies {
-	implementation libs.boot.actuator
-	implementation libs.boot.starter.jdbc
-	implementation libs.boot.starter.webflux
-	implementation libs.jackson.databind
-	implementation libs.h2
-	implementation libs.boot.starter.security
-	implementation libs.micrometer.bridge.otel
-
-	compileOnly         libs.lombok
-	annotationProcessor libs.lombok
-	compileOnly 	    libs.mapstruct
-	annotationProcessor libs.mapstruct.processor
-
-	testImplementation libs.boot.starter.test
-	testImplementation libs.boot.validation.test
-	testImplementation libs.boot.starter.test
-	testCompileOnly libs.lombok
-	testRuntimeOnly libs.junit.platform.launcher
-	testAnnotationProcessor libs.lombok
-}
-
-tasks.named("test") {
-	useJUnitPlatform()
-}
