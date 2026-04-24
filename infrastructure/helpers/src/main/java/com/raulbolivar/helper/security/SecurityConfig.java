@@ -36,9 +36,12 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
 
-        AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(mockAuthenticationManager());
-        authenticationWebFilter.setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
-        authenticationWebFilter.setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.anyExchange());
+        AuthenticationWebFilter authenticationWebFilter =
+                new AuthenticationWebFilter(mockAuthenticationManager());
+        authenticationWebFilter
+                .setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
+        authenticationWebFilter
+                .setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.anyExchange());
 
         authenticationWebFilter.setAuthenticationFailureHandler((webFilterExchange, exception) ->
                 requiredRequestHeadersWebFilter.writeError(
@@ -74,8 +77,10 @@ public class SecurityConfig {
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .addFilterAt(requiredRequestHeadersWebFilter, SecurityWebFiltersOrder.FIRST)
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((exchange, ex) ->
-                        requiredRequestHeadersWebFilter.writeError(exchange, HttpStatus.UNAUTHORIZED, ex.getMessage())))
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint((exchange, ex) ->
+                                requiredRequestHeadersWebFilter
+                                        .writeError(exchange, HttpStatus.UNAUTHORIZED, ex.getMessage())))
                 .authorizeExchange(exchanges -> exchanges
                         .anyExchange().authenticated()
                 ).build();
@@ -85,7 +90,9 @@ public class SecurityConfig {
     public ReactiveAuthenticationManager mockAuthenticationManager() {
         return authentication -> {
 
-            String token = authentication.getCredentials() != null ? authentication.getCredentials().toString() : "";
+            String token = authentication.getCredentials() != null
+                    ? authentication.getCredentials().toString()
+                    : "";
             if (!mockBearerToken.equals(token)) {
                 return Mono.error(new BadCredentialsException("Invalid bearer token"));
             }

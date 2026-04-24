@@ -36,8 +36,10 @@ public class UserUseCase {
 
     public Mono<UserMockDefinition> get(Long id) {
         return persistenceGateway.findById(id)
-                .doOnSuccess(mock -> log.info("[API-MOCKS] Loaded mock {}", id))
-                .doOnError(error -> log.error("[API-MOCKS] Error loading mock {}: {}", id, error.getMessage()));
+                .doOnSuccess(mock -> log.info(
+                        "[API-MOCKS] Loaded mock {}", id))
+                .doOnError(error -> log.error(
+                        "[API-MOCKS] Error loading mock {}: {}", id, error.getMessage()));
     }
 
     public Mono<UserMockDefinition> create(UserMockDefinition definition) {

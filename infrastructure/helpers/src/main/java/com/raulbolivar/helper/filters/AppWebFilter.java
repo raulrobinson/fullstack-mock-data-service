@@ -44,7 +44,8 @@ public class AppWebFilter implements WebFilter {
         return UUID.randomUUID().toString();
     }
 
-    private void addCorrelationIdToResponse(ServerWebExchange exchange, String correlationId) {
+    private void addCorrelationIdToResponse(ServerWebExchange exchange,
+                                            String correlationId) {
         exchange.getResponse()
                 .getHeaders()
                 .add(HEADER, correlationId);

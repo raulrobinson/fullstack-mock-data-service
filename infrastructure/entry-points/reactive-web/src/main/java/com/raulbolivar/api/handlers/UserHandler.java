@@ -28,22 +28,26 @@ public class UserHandler {
 
     public Mono<ServerResponse> list(ServerRequest request) {
         return Mono.zip(useCase.list(), useCase.runtimeInfo())
-                .flatMap(tuple -> ServerResponse.ok()
+                .flatMap(tuple -> ServerResponse
+                        .ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(Map.of(
                                 "items", mapper.toDtoList(tuple.getT1()),
                                 "count", tuple.getT1().size(),
                                 "runtime", mapper.toDto(tuple.getT2())
-                        )))
-                .onErrorResume(this::handleError);
+                        )));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> get(ServerRequest request) {
         return parseId(request)
                 .flatMap(useCase::get)
                 .map(mapper::toDto)
-                .flatMap(dto -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(dto))
-                .onErrorResume(this::handleError);
+                .flatMap(dto -> ServerResponse
+                        .ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(dto));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> create(ServerRequest request) {
@@ -51,11 +55,12 @@ public class UserHandler {
                 .map(mapper::toDomain)
                 .flatMap(useCase::create)
                 .map(mapper::toDto)
-                .flatMap(dto -> ServerResponse.status(HttpStatus.CREATED)
+                .flatMap(dto -> ServerResponse
+                        .status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Location", "/api/user-mocks/" + dto.id())
-                        .bodyValue(dto))
-                .onErrorResume(this::handleError);
+                        .bodyValue(dto));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> update(ServerRequest request) {
@@ -64,33 +69,42 @@ public class UserHandler {
                         .map(mapper::toDomain)
                         .flatMap(dto -> useCase.update(id, dto))
                         .map(mapper::toDto)
-                        .flatMap(dto -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(dto)))
-                .onErrorResume(this::handleError);
+                        .flatMap(dto -> ServerResponse
+                                .ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(dto)));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> delete(ServerRequest request) {
         return parseId(request)
                 .flatMap(id -> useCase.delete(id)
-                        .then(ServerResponse.noContent().build()))
-                .onErrorResume(this::handleError);
+                        .then(ServerResponse
+                                .noContent()
+                                .build()));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> reload(ServerRequest request) {
         return useCase.reloadScriptedMocks()
                 .flatMap(count -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("status", "reloaded", "count", count)))
-                .onErrorResume(this::handleError);
+                        .bodyValue(Map.of("status", "reloaded", "count", count)));
+                //.onErrorResume(this::handleError);
     }
 
     public Mono<ServerResponse> loadSql(ServerRequest request) {
         return request.bodyToMono(Map.class)
                 .defaultIfEmpty(Map.of())
                 .flatMap(body -> {
-                    String sqlScript = body.get("scriptSql") instanceof String value ? value : "";
+
+                    String sqlScript = body.get("scriptSql") instanceof String value
+                            ? value
+                            : "";
                     if (sqlScript.isBlank() && body.get("sql") instanceof String fallback) {
                         sqlScript = fallback;
                     }
+
                     if (sqlScript.isBlank() && body.get("script") instanceof String extraFallback) {
                         sqlScript = extraFallback;
                     }
@@ -101,56 +115,67 @@ public class UserHandler {
                     }
 
                     return useCase.loadSqlScript(sqlScript, replaceScripted)
-                            .flatMap(count -> ServerResponse.ok()
+                            .flatMap(count -> ServerResponse
+                                    .ok()
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .bodyValue(Map.of("status", "loaded", "count", count)));
-                })
-                .onErrorResume(this::handleError);
+                });
+                //.onErrorResume(this::handleError);
     }
 
     private Mono<Long> parseId(ServerRequest request) {
         return Mono.fromCallable(() -> Long.parseLong(request.pathVariable("id")))
                 .onErrorMap(NumberFormatException.class,
-                        error -> new IllegalArgumentException("Path variable 'id' must be numeric"));
+                        error -> new IllegalArgumentException(
+                                "Path variable 'id' must be numeric"));
     }
 
-    private Mono<ServerResponse> handleError(Throwable error) {
-        if (error instanceof UnsupportedMediaTypeStatusException mediaTypeError) {
-            return ServerResponse.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(errorBody(mediaTypeError.getMessage()));
-        }
-
-        if (error instanceof ServerWebInputException) {
-            return ServerResponse.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(errorBody("Invalid request body"));
-        }
-
-        if (error instanceof DecodingException) {
-            return ServerResponse.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(errorBody("Invalid JSON request body"));
-        }
-
-        if (error instanceof IllegalArgumentException) {
-            return ServerResponse.badRequest()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(errorBody(error.getMessage()));
-        }
-
-        if (error instanceof NoSuchElementException) {
-            return ServerResponse.status(404)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(errorBody(error.getMessage()));
-        }
-
-        return ServerResponse.status(500)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(errorBody(error.getMessage()));
-    }
-
-    private Map<String, String> errorBody(String message) {
-        return Map.of("error", message != null ? message : "Unexpected error");
-    }
+//    private Mono<ServerResponse> handleError(Throwable error) {
+//
+//        if (error instanceof UnsupportedMediaTypeStatusException mediaTypeError) {
+//            return ServerResponse
+//                    .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(errorBody(mediaTypeError.getMessage()));
+//        }
+//
+//        if (error instanceof ServerWebInputException) {
+//            return ServerResponse
+//                    .badRequest()
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(errorBody("Invalid request body"));
+//        }
+//
+//        if (error instanceof DecodingException) {
+//            return ServerResponse
+//                    .badRequest()
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(errorBody("Invalid JSON request body"));
+//        }
+//
+//        if (error instanceof IllegalArgumentException) {
+//            return ServerResponse
+//                    .badRequest()
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(errorBody(error.getMessage()));
+//        }
+//
+//        if (error instanceof NoSuchElementException) {
+//            return ServerResponse
+//                    .status(404)
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .bodyValue(errorBody(error.getMessage()));
+//        }
+//
+//        return ServerResponse
+//                .status(500)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(errorBody(error.getMessage()));
+//    }
+//
+//    private Map<String, String> errorBody(String message) {
+//        return Map.of("error", message != null
+//                ? message
+//                : "Unexpected error");
+//    }
 }

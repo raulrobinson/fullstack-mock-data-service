@@ -16,7 +16,6 @@ public class TraceIdUtil {
     public String getTraceId() {
 
         Tracer tracer = tracerProvider.getIfAvailable();
-
         if (tracer == null || tracer.currentSpan() == null) {
             return null;
         }

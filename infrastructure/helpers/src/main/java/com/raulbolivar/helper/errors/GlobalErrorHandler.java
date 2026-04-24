@@ -18,15 +18,13 @@ import reactor.util.annotation.NonNull;
 
 import java.time.Instant;
 
+import static com.raulbolivar.helper.Constants.*;
+
 @Slf4j
 @Component
 @Order(-2)
 @RequiredArgsConstructor
 public class GlobalErrorHandler implements WebExceptionHandler {
-
-    private static final String DEFAULT_DOMAIN = "system";
-    private static final String DEFAULT_ERROR_CODE = "INTERNAL_ERROR";
-    private static final String DEFAULT_ERROR_MESSAGE = "Unexpected server error";
 
     private final ObjectMapper mapper;
     private final TraceIdUtil traceIdUtil;

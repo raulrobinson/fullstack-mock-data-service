@@ -14,11 +14,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.raulbolivar.helper.Constants.APPLICATION_ID;
+import static com.raulbolivar.helper.Constants.SOURCE_BANK;
+
 @Component
 public class RequiredRequestHeadersWebFilter implements WebFilter {
-
-    public static final String SOURCE_BANK = "Source-Bank";
-    public static final String APPLICATION_ID = "Application-Id";
 
     @Override
     public @NonNull Mono<Void> filter(@NonNull ServerWebExchange exchange,
@@ -41,7 +41,9 @@ public class RequiredRequestHeadersWebFilter implements WebFilter {
         return chain.filter(exchange);
     }
 
-    public Mono<Void> writeError(ServerWebExchange exchange, HttpStatus status, String message) {
+    public Mono<Void> writeError(ServerWebExchange exchange,
+                                 HttpStatus status,
+                                 String message) {
         if (exchange.getResponse().isCommitted()) {
             return Mono.empty();
         }

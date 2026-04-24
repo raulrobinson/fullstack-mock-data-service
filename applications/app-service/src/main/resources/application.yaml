@@ -19,6 +19,9 @@ spring:
     init:
       mode: always
 
+server:
+  port: 9080
+
 dashboard:
   api:
     key: super-secret-dashboard-key
