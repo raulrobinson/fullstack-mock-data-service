@@ -39,24 +39,30 @@ public class SecurityConfig {
         AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(mockAuthenticationManager());
         authenticationWebFilter.setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
         authenticationWebFilter.setRequiresAuthenticationMatcher(ServerWebExchangeMatchers.anyExchange());
+
         authenticationWebFilter.setAuthenticationFailureHandler((webFilterExchange, exception) ->
                 requiredRequestHeadersWebFilter.writeError(
                         webFilterExchange.getExchange(),
                         HttpStatus.UNAUTHORIZED,
                         exception.getMessage()
                 ));
+
         authenticationWebFilter.setServerAuthenticationConverter(exchange -> {
+
             String authorization = exchange.getRequest().getHeaders().getFirst("Authorization");
             if (authorization == null || authorization.isBlank()) {
                 return Mono.error(new BadCredentialsException("Missing Authorization header"));
             }
+
             if (!authorization.startsWith("Bearer ")) {
                 return Mono.error(new BadCredentialsException("Authorization header must use Bearer token"));
             }
+
             String token = authorization.substring("Bearer ".length()).trim();
             if (token.isBlank()) {
                 return Mono.error(new BadCredentialsException("Bearer token is required"));
             }
+
             return Mono.just(new UsernamePasswordAuthenticationToken("mock-user", token));
         });
 
@@ -70,21 +76,20 @@ public class SecurityConfig {
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((exchange, ex) ->
                         requiredRequestHeadersWebFilter.writeError(exchange, HttpStatus.UNAUTHORIZED, ex.getMessage())))
-
                 .authorizeExchange(exchanges -> exchanges
                         .anyExchange().authenticated()
-                )
-
-                .build();
+                ).build();
     }
 
     @Bean
     public ReactiveAuthenticationManager mockAuthenticationManager() {
         return authentication -> {
+
             String token = authentication.getCredentials() != null ? authentication.getCredentials().toString() : "";
             if (!mockBearerToken.equals(token)) {
                 return Mono.error(new BadCredentialsException("Invalid bearer token"));
             }
+
             return Mono.just(new UsernamePasswordAuthenticationToken(
                     "mock-user",
                     token,

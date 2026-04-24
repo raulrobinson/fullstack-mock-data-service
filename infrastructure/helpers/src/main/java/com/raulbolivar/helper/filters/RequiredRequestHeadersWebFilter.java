@@ -53,6 +53,7 @@ public class RequiredRequestHeadersWebFilter implements WebFilter {
         exchange.getResponse().setStatusCode(status);
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
         DataBuffer dataBuffer = exchange.getResponse().bufferFactory().wrap(payload);
+
         return exchange.getResponse().writeWith(Mono.just(dataBuffer));
     }
 

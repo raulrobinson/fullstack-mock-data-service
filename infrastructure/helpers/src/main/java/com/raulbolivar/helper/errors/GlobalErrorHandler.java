@@ -34,15 +34,12 @@ public class GlobalErrorHandler implements WebExceptionHandler {
     @Override
     public @NonNull Mono<Void> handle(@NonNull ServerWebExchange exchange,
                                       @NonNull Throwable ex) {
-
         if (exchange.getResponse().isCommitted()) {
             return Mono.error(ex);
         }
 
         ApiError apiError = buildApiError(exchange, ex);
-
         logError(apiError);
-
         configureResponse(exchange);
 
         return writeErrorResponse(exchange, apiError);
