@@ -1,4 +1,4 @@
-package com.raulbolivar.fs.infrastructure.helpers;
+package com.raulbolivar.fs.infrastructure.helpers.loader;
 
 import com.raulbolivar.fs.application.usecase.UserUseCase;
 import lombok.RequiredArgsConstructor;

@@ -23,6 +23,8 @@ dependencies {
 	implementation libs.boot.starter.webflux
 	implementation libs.jackson.databind
 	implementation libs.h2
+	implementation libs.boot.starter.security
+	implementation libs.micrometer.bridge.otel
 
 	compileOnly         libs.lombok
 	annotationProcessor libs.lombok

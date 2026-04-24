@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -23,11 +24,15 @@ class UserApiIntegrationTest {
 
     private static final String DB_NAME = "user-api-test-" + UUID.randomUUID();
     private static final Path SCRIPT_DIR = Path.of("build", "test-scripts", UUID.randomUUID().toString()).toAbsolutePath();
+    private static final String AUTH_TOKEN = "test-token";
+    private static final String SOURCE_BANK = "bank-test";
+    private static final String APPLICATION_ID = "app-test";
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", () -> "jdbc:h2:mem:" + DB_NAME + ";MODE=LEGACY;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE");
         registry.add("user-mocks.scripts-dir", () -> SCRIPT_DIR.toString());
+        registry.add("app-security.mock-bearer-token", () -> AUTH_TOKEN);
     }
 
     @Autowired
@@ -38,6 +43,12 @@ class UserApiIntegrationTest {
 
     @BeforeEach
     void resetStorage() throws IOException {
+        webTestClient = webTestClient.mutate()
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + AUTH_TOKEN)
+                .defaultHeader("Source-Bank", SOURCE_BANK)
+                .defaultHeader("Application-Id", APPLICATION_ID)
+                .build();
+
         jdbcTemplate.update("DELETE FROM user_mocks");
         if (Files.exists(SCRIPT_DIR)) {
             try (var walk = Files.walk(SCRIPT_DIR)) {
@@ -166,6 +177,35 @@ class UserApiIntegrationTest {
                 .expectBody()
                 .jsonPath("$.count").isEqualTo(1)
                 .jsonPath("$.items[0].name").isEqualTo("reloaded-user");
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenAuthorizationHeaderIsMissing() {
+        webTestClient.mutate()
+                .defaultHeaders(headers -> headers.remove(HttpHeaders.AUTHORIZATION))
+                .build()
+                .get()
+                .uri("/api/user-mocks")
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Missing Authorization header");
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenRequiredHeadersAreMissing() {
+        webTestClient.mutate()
+                .defaultHeaders(headers -> {
+                    headers.remove("Source-Bank");
+                    headers.remove("Application-Id");
+                })
+                .build()
+                .get()
+                .uri("/api/user-mocks")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.error").isEqualTo("Missing required header(s): Source-Bank, Application-Id");
     }
 }
 

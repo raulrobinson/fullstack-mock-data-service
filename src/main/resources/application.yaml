@@ -1,7 +1,4 @@
 spring:
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
   main:
     lazy-initialization: true
   application:
@@ -22,10 +19,17 @@ spring:
     init:
       mode: always
 
+dashboard:
+  api:
+    key: super-secret-dashboard-key
+
 user-mocks:
   wiremock-port: 18080
   auto-load-scripts: true
   scripts-dir: ./third-parties/users-mocks/sql
+
+app-security:
+  mock-bearer-token: mock-token
 
 logging:
   pattern:
