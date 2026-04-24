@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':model')
+    implementation project(':ports')
+
+    implementation libs.boot.starter.webflux
+    implementation libs.jackson.databind
+
+    compileOnly         libs.lombok
+    annotationProcessor libs.lombok
+    compileOnly 	    libs.mapstruct
+    annotationProcessor libs.mapstruct.processor
+}

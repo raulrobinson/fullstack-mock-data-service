@@ -2,9 +2,12 @@ package com.raulbolivar.usecase;
 
 import com.raulbolivar.model.ApiMockRuntimeInfo;
 import com.raulbolivar.model.UserMockDefinition;
+import com.raulbolivar.model.user.User;
+import com.raulbolivar.ports.IJSONPlaceHolderPostGateway;
 import com.raulbolivar.ports.IUsersGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -17,6 +20,7 @@ import java.util.List;
 public class UserUseCase {
 
     private final IUsersGateway persistenceGateway;
+    private final IJSONPlaceHolderPostGateway jsonPlaceHolderGateway;
 
     @Value("${user-mocks.scripts-dir:./third-parties/users-mocks/sql}")
     private String scriptsDir;
@@ -129,4 +133,10 @@ public class UserUseCase {
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
     }
+
+//    public Publisher<User> bulkInsertMockUsers(List<User> users) {
+//        return jsonPlaceHolderGateway.bulkInsertMockUsers(users)
+//                .doOnSuccess(count -> log.info("[API-MOCKS] Bulk inserted {} mock users", count))
+//                .doOnError(error -> log.error("[API-MOCKS] Error bulk inserting mock users: {}", error.getMessage()));
+//    }
 }

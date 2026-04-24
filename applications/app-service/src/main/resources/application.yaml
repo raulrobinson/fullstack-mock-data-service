@@ -31,6 +31,26 @@ user-mocks:
 app-security:
   mock-bearer-token: mock-token
 
+app:
+  client-api:
+    jsonplaceholder:
+      user:
+        base-url: https://jsonplaceholder.typicode.com
+        connect-timeout: 2s
+        response-timeout: 3s
+        read-timeout: 3s
+        write-timeout: 3s
+        max-connections: 100
+        pending-acquire-timeout: 5s
+      post:
+        base-url: https://jsonplaceholder.typicode.com
+        connect-timeout: 2s
+        response-timeout: 3s
+        read-timeout: 3s
+        write-timeout: 3s
+        max-connections: 100
+        pending-acquire-timeout: 5s
+
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n"

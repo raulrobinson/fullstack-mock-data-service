@@ -17,5 +17,7 @@ include "reactive-web"
 project(':reactive-web').projectDir = file('infrastructure/entry-points/reactive-web')
 include "in-memory-persistence"
 project(':in-memory-persistence').projectDir = file('infrastructure/driven-adapters/in-memory-persistence')
+include 'json-placeholder-client-api'
+project(':json-placeholder-client-api').projectDir = file('infrastructure/driven-adapters/json-placeholder-client-api')
 include "helpers"
 project(':helpers').projectDir = file('infrastructure/helpers')

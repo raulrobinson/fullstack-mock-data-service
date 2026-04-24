@@ -6,6 +6,7 @@ dependencies {
     implementation project(':ports')
     implementation project(':use-case')
     implementation project(':in-memory-persistence')
+    implementation project(':json-placeholder-client-api')
     implementation project(':reactive-web')
     implementation libs.boot.starter.webflux
 }
