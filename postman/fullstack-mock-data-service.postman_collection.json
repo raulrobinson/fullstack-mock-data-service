@@ -1,0 +1,536 @@
+{
+  "info": {
+    "_postman_id": "7c658f9e-8ac6-43f9-93d8-db677d00e3e4",
+    "name": "fullstack-mock-data-service",
+    "description": "Coleccion Postman para probar todos los endpoints del servicio con casos funcionales y de seguridad.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('createdId')) {",
+          "  pm.collectionVariables.set('createdId', '1');",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "bearerToken", "value": "mock-token" },
+    { "key": "sourceBank", "value": "BANK-TEST" },
+    { "key": "applicationId", "value": "APP-TEST" },
+    { "key": "createdId", "value": "1" },
+    { "key": "notFoundId", "value": "999999" },
+    {
+      "key": "sqlScript",
+      "value": "INSERT INTO user_mocks (name, description, created_at, updated_at) VALUES ('postman-sql-user', 'created by postman', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Health",
+      "item": [
+        {
+          "name": "GET /actuator/health",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/actuator/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 - User Mocks - Happy Path",
+      "item": [
+        {
+          "name": "GET /api/user-mocks (list)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Tiene estructura esperada', function () {",
+                  "  pm.expect(body).to.have.property('items');",
+                  "  pm.expect(body).to.have.property('count');",
+                  "  pm.expect(body).to.have.property('runtime');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks (create)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"postman-created-user\",\n  \"description\": \"usuario creado desde postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.collectionVariables.set('createdId', String(body.id));",
+                  "pm.test('Guarda createdId para pruebas siguientes', function () {",
+                  "  pm.expect(pm.collectionVariables.get('createdId')).to.match(/^\\d+$/);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/user-mocks/{id} (get by id)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks/{{createdId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Retorna el id esperado', function () {",
+                  "  pm.expect(String(body.id)).to.eql(pm.collectionVariables.get('createdId'));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /api/user-mocks/{id} (update)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"postman-updated-user\",\n  \"description\": \"usuario actualizado desde postman\"\n}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks/{{createdId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Nombre actualizado', function () {",
+                  "  pm.expect(body.name).to.eql('postman-updated-user');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks/load-sql",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sql\": \"{{sqlScript}}\",\n  \"replaceScripted\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks/load-sql"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Estado loaded', function () {",
+                  "  pm.expect(body.status).to.eql('loaded');",
+                  "  pm.expect(body.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks/reload",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks/reload"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Estado reloaded', function () {",
+                  "  pm.expect(body.status).to.eql('reloaded');",
+                  "  pm.expect(body.count).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/user-mocks/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks/{{createdId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 204', function () {",
+                  "  pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - User Mocks - Negative Cases",
+      "item": [
+        {
+          "name": "GET /api/user-mocks/{id} - id no numerico",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks/not-a-number"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje de id invalido', function () {",
+                  "  pm.expect(body.error).to.eql(\"Path variable 'id' must be numeric\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/user-mocks/{id} - no existe",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks/{{notFoundId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 404', function () {",
+                  "  pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks - body invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": \"sin nombre\"\n}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje de validacion', function () {",
+                  "  pm.expect(body.error).to.eql('Mock name is required');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks/load-sql - payload vacio",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks/load-sql"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje de script requerido', function () {",
+                  "  pm.expect(body.error).to.eql('SQL script content is required');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Security - Negative Cases",
+      "item": [
+        {
+          "name": "GET /api/user-mocks - sin Authorization",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje de auth faltante', function () {",
+                  "  pm.expect(body.error).to.eql('Missing Authorization header');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/user-mocks - bearer invalido",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer invalid-token" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje de token invalido', function () {",
+                  "  pm.expect(body.error).to.eql('Invalid bearer token');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/user-mocks - sin Source-Bank/Application-Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" }
+            ],
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Mensaje por headers obligatorios faltantes', function () {",
+                  "  pm.expect(body.error).to.eql('Missing required header(s): Source-Bank, Application-Id');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/user-mocks - content-type incorrecto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{bearerToken}}" },
+              { "key": "Source-Bank", "value": "{{sourceBank}}" },
+              { "key": "Application-Id", "value": "{{applicationId}}" },
+              { "key": "Content-Type", "value": "text/plain" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"x\"}"
+            },
+            "url": "{{baseUrl}}/api/user-mocks"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 415', function () {",
+                  "  pm.response.to.have.status(415);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
