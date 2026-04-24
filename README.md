@@ -108,7 +108,7 @@ Importa la coleccion y ajusta variables (`baseUrl`, `bearerToken`, `sourceBank`,
 
 ## Autor
 - [Raul Bolivar](https://linkedin.com/in/rasysbox/)
-- [GitHub](https://github.com/rasysbox)
+- [GitHub](https://github.com/raulrobinson/fullstack-mock-data-service)
 - [Email](mailto:rasysbox@hotmail.com)
 
 ## Licencia
